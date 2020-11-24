@@ -1,0 +1,14 @@
+.container-fluid {
+  width: 100vw;
+  height: 100vh;
+}
+
+input[type='text'] {
+  text-align: center;
+  width: 25vw;
+}
+
+#hNumInput > span {
+  position: absolute;
+  left: 12.3vw;
+}

@@ -1,9 +1,7 @@
-Header text - handle element generation side effects
-Image:
-	-Include sample images
-	-Image component
-Navbar:
-	-Where users can select their component choice with a single click
+-Header:
 
-LinkView:
-	-A concept where you connect to database, store the content with its corresponding user id. The linkview will contain an encrypted user id, which you will decrypt, connect to database, obtain the content, and display it on the webpage. Also if current link has a linkview, the viewer cannot edit the content.
+-Image:
+
+-Navbar
+
+-LinkView: those with this link can view the content of another user, but they cannot edit it. This would require server-side code to acheive

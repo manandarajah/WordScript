@@ -20,8 +20,8 @@ $(document).ready(function() {
   componentOffsets.set("image", {xOffset: 400, yOffset: 140});
 
   var components = new Map();
-  components.set("header", () => {app.addHeader(newObj);});
-  components.set("image", () => {app.addImage(newObj);});
+  components.set("header", (newObj) => {app.addHeader(newObj);});
+  components.set("image", (newObj) => {app.addImage(newObj);});
 
   //ReactDOM.render(<h1>This is from React</h1>, document.getElementsByClassName("container-fluid")[0]);
 
@@ -78,7 +78,7 @@ $(document).ready(function() {
         }*/
 
         //This code calls anonymous function stored in key 'selectedComponent'
-        components.get(selectedComponent)();
+        components.get(selectedComponent)(newObj);
         //console.log(focusedElement);
         //window.elementFocused = true;
         //focusedElement.elementFocusedTransistor();

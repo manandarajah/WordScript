@@ -1,7 +1,0 @@
--Header:
-
--Image:
-
--Navbar
-
--LinkView: those with this link can view the content of another user, but they cannot edit it. This would require server-side code to acheive

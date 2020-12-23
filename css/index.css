@@ -1,11 +1,28 @@
-.container-fluid {
-  width: 100vw;
-  height: 100vh;
+body {
+  overflow-y: hidden;
+}
+
+nav {
+  top: 25vh;
 }
 
 input[type='text'] {
   text-align: center;
   width: 25vw;
+}
+
+td > img {
+  width: 15vw;
+  height: 15vh;
+}
+
+.container-fluid {
+  width: 100vw;
+  height: 100vh;
+}
+
+.col-sm-1 {
+  width: 10vw;
 }
 
 #hNumInput > span {

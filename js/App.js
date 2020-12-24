@@ -14,79 +14,40 @@ class App extends React.Component {
     /*You need this parameter because react class component automatically has
     strict-mode enabled, causing elements to render twice during the first run
     as a side effect*/
-    this.firstHeaderRender = true;
-    this.firstImageRender = true;
+    this.firstRender = new Map();
+    this.firstRender.set("Header", true);
+    this.firstRender.set("Image", true);
 
-    this.handleHeaderTrasfer = this.handleHeaderTrasfer.bind(this);
-    this.handleImageTrasfer = this.handleImageTrasfer.bind(this);
+    //A map of components list
+    this.componentsData = new Map();
+    this.componentsData.set("Header", this.state.headers);
+    this.componentsData.set("Image", this.state.images);
+
+    //A map of anonymous functions updating components list onDataTransfer
+    this.componentsAltered = new Map();
+    this.componentsAltered.set("Header", (headers) => { this.setState({ headers: headers }); });
+    this.componentsAltered.set("Image", (images) => { this.setState({ images: images }); });
+
+    this.handleDataTransfer = this.handleDataTransfer.bind(this);
   }
 
-  addHeader(newHeaderObj) {
-    let headers = this.state.headers;
-    headers.push(newHeaderObj);
-
-    this.setState({
-      headers: headers
-    });
-    /*return ReactDOM.render(<Header isElementFocused={newHeaderObj[0].isElementFocused}
-                                    size={newHeaderObj[0].size} />,
-                                    document.getElementsByClassName("container-fluid")[0]);*/
+  addComponent(newObj, type) {
+    let compData = this.componentsData.get(type);
+    compData.push(newObj);
+    this.componentsAltered.get(type)(compData);
   }
 
-  addImage(newImageObj) {
-    let images = this.state.images;
-    images.push(newImageObj);
+  handleDataTransfer(index, data) {
+    let compData = this.componentsData.get(data.type);
 
-    this.setState({
-      images: images
-    });
-  }
+    if (this.firstRender.get(data.type)) {
+      compData.pop();
 
-  handleHeaderTrasfer(index, data) {
-    //if (this.state.positon != null) {
-      let headers = this.state.headers;
-
-      if (this.firstHeaderRender) {
-        headers.pop();
-
-        this.firstHeaderRender = false;
-      }
-      headers[index] = data;
-
-      /*if (headers.length == 0) this.setState({headers: data});
-      else {
-        Object.keys(headers).map((h, index) => {
-          var header = headers[h];
-
-          if (header.id == data.id
-                && (header.val !== data.val
-                      || header.position != data.position)
-              )
-            headers[index] = data;
-        });*/
-
-        this.setState({
-          headers: headers
-        });
-        console.log(headers);
-      //}
-    //}
-  }
-
-  handleImageTrasfer(index, data) {
-    let images = this.state.images;
-
-    if (this.firstImageRender) {
-      images.pop();
-
-      this.firstImageRender = false;
+      this.firstRender.set(data.type, false);
     }
-    images[index] = data;
+    compData[index] = data;
 
-    this.setState({
-      images: images
-    });
-    console.log(images);
+    this.componentsAltered.get(data.type)(compData);
   }
 
   render() {
@@ -108,7 +69,7 @@ class App extends React.Component {
                       id={header.id}
                       size={header.size}
                       val={header.val}
-                      onDataTransfer={this.handleHeaderTrasfer} />
+                      onDataTransfer={this.handleDataTransfer} />
             );
           })}
         </section>
@@ -124,7 +85,7 @@ class App extends React.Component {
                     position={image.position}
                     id={image.id}
                     path={image.path}
-                    onDataTransfer={this.handleImageTrasfer} />
+                    onDataTransfer={this.handleDataTransfer} />
           );
         })}
         </section>

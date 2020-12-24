@@ -13,6 +13,7 @@ class Header extends React.Component {
     super(props);
 
     this.state = {
+      type: "Header",
       position: props.position,
       id: "",
       size: 1,
@@ -38,17 +39,6 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
-    /*setInterval(() => {
-      this.setState({
-        isElementFocused: window.elementFocused
-      });
-    }, 1000);*/
-
-    /*document.addEventListener('wheel', this.handleSizeChange, false);
-    document.addEventListener('change', this.handleChange, false);
-    document.addEventListener('blur', this.elementFocusedTransistor, false);
-    document.addEventListener('click', this.elementFocusedTransistor, false);*/
-
     let position = this.state.position;
 
     $(ReactDOM.findDOMNode(this)).css({"position": "absolute", "top": position.top, "left": position.left});
@@ -67,10 +57,6 @@ class Header extends React.Component {
 
   componentWillUnmount() {
     this.mounted = false;
-    /*document.removeEventListener('wheel', this.handleSizeChange, false);
-    document.removeEventListener('change', this.handleChange, false);
-    document.removeEventListener('blur', this.elementFocusedTransistor, false);
-    document.removeEventListener('click', this.elementFocusedTransistor, false);*/
   }
 
   elementFocusedTransistor(event) {
@@ -82,12 +68,11 @@ class Header extends React.Component {
   handleChange(event) {
     var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var newVal = $(event.target).val();
-    var newValEnc = newVal;
+    var newValEnc = newVal.split('');
     var breakPoint = parseInt(Math.random() * newVal.length);
 
     for (var i = 0; i < newVal.length; ++i) {
-      newValEnc = newValEnc.replace(newValEnc[parseInt(Math.random() * newVal.length)],
-                                      characters[parseInt(Math.random() * characters.length)]);
+      newValEnc[parseInt(Math.random() * newValEnc.length)] = characters[parseInt(Math.random() * characters.length)];
 
       //if (breakPoint % 2 == 0) newValEnc[i] = characters[parseInt(Math.random() * characters.length)];
 
@@ -124,11 +109,6 @@ class Header extends React.Component {
       size: 0,
       val: ""
     });
-    /*this.setState({
-      id: newDataObj.id,
-      size: newDataObj.size,
-      val: newDataObj.val
-    });*/
   }
 
   render() {

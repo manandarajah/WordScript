@@ -3,6 +3,7 @@ class Image extends React.Component {
     super(props);
 
     this.state = {
+      type: "Image",
       position: props.position,
       id: "",
       path: "",
@@ -33,17 +34,6 @@ class Image extends React.Component {
   }
 
   componentDidMount() {
-    /*setInterval(() => {
-      this.setState({
-        isElementFocused: window.elementFocused
-      });
-    }, 1000);*/
-
-    /*document.addEventListener('wheel', this.handleSizeChange, false);
-    document.addEventListener('change', this.handleChange, false);
-    document.addEventListener('blur', this.elementFocusedTransistor, false);
-    document.addEventListener('click', this.elementFocusedTransistor, false);*/
-
     let position = this.state.position;
 
     $(ReactDOM.findDOMNode(this)).css({"position": "absolute", "top": position.top, "left": position.left});
@@ -67,10 +57,6 @@ class Image extends React.Component {
 
   componentWillUnmount() {
     this.mounted = false;
-    /*document.removeEventListener('wheel', this.handleSizeChange, false);
-    document.removeEventListener('change', this.handleChange, false);
-    document.removeEventListener('blur', this.elementFocusedTransistor, false);
-    document.removeEventListener('click', this.elementFocusedTransistor, false);*/
   }
 
   elementFocusedTransistor(event) {
@@ -82,7 +68,7 @@ class Image extends React.Component {
   handleChange(event) {
     var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var newVal = $(event.target)[0].currentSrc;
-    var newValEnc = newVal;
+    var newValEnc = newVal.split('');
     var breakPoint = parseInt(Math.random() * newVal.length);
 
     $(event.target).parent().css("background-color", "blue");
@@ -93,8 +79,7 @@ class Image extends React.Component {
     this.currentImage = event.target;
 
     for (var i = 0; i < newVal.length; ++i) {
-      newValEnc = newValEnc.replace(newValEnc[parseInt(Math.random() * newVal.length)],
-                                      characters[parseInt(Math.random() * characters.length)]);
+      newValEnc[parseInt(Math.random() * newValEnc.length)] = characters[parseInt(Math.random() * characters.length)];
 
       //if (breakPoint % 2 == 0) newValEnc[i] = characters[parseInt(Math.random() * characters.length)];
 

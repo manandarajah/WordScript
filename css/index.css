@@ -2,13 +2,22 @@ body {
   overflow-y: hidden;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  z-index: 0;
+}
+
 nav {
-  top: 25vh;
+  top: 30vh;
+  z-index: 1;
 }
 
 input[type='text'] {
   text-align: center;
   width: 25vw;
+}
+
+img {
+  z-index: 0;
 }
 
 td > img {
@@ -23,6 +32,14 @@ td > img {
 
 .col-sm-1 {
   width: 80px;
+}
+
+.btn-danger {
+  border-radius: 100%;
+  float: right;
+  position: relative;
+  bottom: 393px;
+  left: 18px;
 }
 
 #hNumInput > span {

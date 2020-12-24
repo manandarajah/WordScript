@@ -14,7 +14,8 @@ class App extends React.Component {
     /*You need this parameter because react class component automatically has
     strict-mode enabled, causing elements to render twice during the first run
     as a side effect*/
-    this.firstRender = true;
+    this.firstHeaderRender = true;
+    this.firstImageRender = true;
 
     this.handleHeaderTrasfer = this.handleHeaderTrasfer.bind(this);
     this.handleImageTrasfer = this.handleImageTrasfer.bind(this);
@@ -45,10 +46,10 @@ class App extends React.Component {
     //if (this.state.positon != null) {
       let headers = this.state.headers;
 
-      if (this.firstRender) {
+      if (this.firstHeaderRender) {
         headers.pop();
 
-        this.firstRender = false;
+        this.firstHeaderRender = false;
       }
       headers[index] = data;
 
@@ -73,7 +74,19 @@ class App extends React.Component {
   }
 
   handleImageTrasfer(index, data) {
+    let images = this.state.images;
 
+    if (this.firstImageRender) {
+      images.pop();
+
+      this.firstImageRender = false;
+    }
+    images[index] = data;
+
+    this.setState({
+      images: images
+    });
+    console.log(images);
   }
 
   render() {

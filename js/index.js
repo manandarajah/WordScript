@@ -36,7 +36,7 @@ $(document).ready(function() {
   });
 
 //Manages content directly on webpage
-  $("div").dblclick(function(e) {
+  $(".container-fluid").dblclick(function(e) {
 
       //Adds a title tag to the webpage when the div tag double click event is invoked
       if (!$(e.target).hasClass("ws-component")) {

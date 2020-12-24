@@ -85,6 +85,8 @@ class App extends React.Component {
                     position={image.position}
                     id={image.id}
                     path={image.path}
+                    width={image.width}
+                    height={image.height}
                     onDataTransfer={this.handleDataTransfer} />
           );
         })}

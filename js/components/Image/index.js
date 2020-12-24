@@ -5,11 +5,11 @@ class Image extends React.Component {
     this.state = {
       type: "Image",
       position: props.position,
-      id: "",
-      path: "",
+      id: props.id,
+      path: props.path,
       size: {
-        width: 50,
-        height: 50
+        width: props.width,
+        height: props.height
       }
     };
 
@@ -34,6 +34,12 @@ class Image extends React.Component {
   }
 
   componentDidMount() {
+
+    if (this.state.id == null) this.setState({ id: "" });
+    if (this.state.path == null) this.setState({ path: "" });
+    if (this.state.size.width == null) this.setState({ size: { width: 50 }});
+    if (this.state.size.height == null) this.setState({ size: { height: 50 }});
+
     let position = this.state.position;
 
     $(ReactDOM.findDOMNode(this)).css({"position": "absolute", "top": position.top, "left": position.left});

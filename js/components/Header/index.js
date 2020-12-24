@@ -15,9 +15,9 @@ class Header extends React.Component {
     this.state = {
       type: "Header",
       position: props.position,
-      id: "",
-      size: 1,
-      val: ""
+      id: props.id,
+      size: props.size,
+      val: props.val
     };
 
     //This variable is used to handle component functionality when it is mounted or unmounted
@@ -39,6 +39,10 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
+    if (this.state.id == null) this.setState({ id: "" });
+    if (this.state.size == null) this.setState({ size: 1 });
+    if (this.state.val == null) this.setState({ val: "" });
+
     let position = this.state.position;
 
     $(ReactDOM.findDOMNode(this)).css({"position": "absolute", "top": position.top, "left": position.left});

@@ -15,10 +15,13 @@ class Header extends React.Component {
     this.state = {
       type: "Header",
       position: props.position,
-      id: props.id,
-      size: props.size,
-      val: props.val
+      id: "",
+      size: 1,
+      val: ""
     };
+
+    //Storing constructor props data into class variable props. This is used purely for mounting purposes
+    this.props = props;
 
     //This variable is used to handle component functionality when it is mounted or unmounted
     this.mounted = true;
@@ -39,9 +42,9 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
-    if (this.state.id == null) this.setState({ id: "" });
-    if (this.state.size == null) this.setState({ size: 1 });
-    if (this.state.val == null) this.setState({ val: "" });
+    if (this.props.id != null) this.setState({ id: props.id });
+    if (this.props.size != null) this.setState({ size: props.size });
+    if (this.props.val != null) this.setState({ val: props.val });
 
     let position = this.state.position;
 

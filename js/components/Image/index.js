@@ -5,13 +5,15 @@ class Image extends React.Component {
     this.state = {
       type: "Image",
       position: props.position,
-      id: props.id,
-      path: props.path,
+      id: "",
+      path: "",
       size: {
-        width: props.width,
-        height: props.height
+        width: 50,
+        height: 50
       }
     };
+
+    this.props = props;
 
     //This variable is used to handle component functionality when it is mounted or unmounted
     this.mounted = true;
@@ -35,10 +37,10 @@ class Image extends React.Component {
 
   componentDidMount() {
 
-    if (this.state.id == null) this.setState({ id: "" });
-    if (this.state.path == null) this.setState({ path: "" });
-    if (this.state.size.width == null) this.setState({ size: { width: 50 }});
-    if (this.state.size.height == null) this.setState({ size: { height: 50 }});
+    if (this.props.id != null) this.setState({ id: props.id });
+    if (this.props.path != null) this.setState({ path: props.path });
+    if (this.props.width != null) this.setState({ size: { width: props.width }});
+    if (this.props.height != null) this.setState({ size: { height: props.height }});
 
     let position = this.state.position;
 

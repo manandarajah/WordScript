@@ -42,9 +42,9 @@ class Header extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.id != null) this.setState({ id: props.id });
-    if (this.props.size != null) this.setState({ size: props.size });
-    if (this.props.val != null) this.setState({ val: props.val });
+    if (this.props.id != null) this.setState({ id: this.props.id });
+    if (this.props.size != null) this.setState({ size: this.props.size });
+    if (this.props.val != null) this.setState({ val: this.props.val });
 
     let position = this.state.position;
 

@@ -37,10 +37,10 @@ class Image extends React.Component {
 
   componentDidMount() {
 
-    if (this.props.id != null) this.setState({ id: props.id });
-    if (this.props.path != null) this.setState({ path: props.path });
-    if (this.props.width != null) this.setState({ size: { width: props.width }});
-    if (this.props.height != null) this.setState({ size: { height: props.height }});
+    if (this.props.id != null) this.setState({ id: this.props.id });
+    if (this.props.path != null) this.setState({ path: this.props.path });
+    if (this.props.width != null) this.setState({ size: { width: this.props.width }});
+    if (this.props.height != null) this.setState({ size: { height: this.props.height }});
 
     let position = this.state.position;
 

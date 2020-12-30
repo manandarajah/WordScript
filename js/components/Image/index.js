@@ -3,14 +3,16 @@ class Image extends React.Component {
     super(props);
 
     this.state = {
+      id: props.id,
       type: "Image",
       position: props.position,
-      id: "",
+      eId: "image",
       path: "",
       size: {
         width: 50,
         height: 50
-      }
+      },
+      canDelete: false
     };
 
     this.props = props;
@@ -18,29 +20,36 @@ class Image extends React.Component {
     //This variable is used to handle component functionality when it is mounted or unmounted
     this.mounted = true;
 
+    this.type = "Image";
+
     //Controls wheather the element is focused on for editing or not
     this.isElementFocused = true;
 
     this.currentImage = "";
 
     setInterval(() => {
-        if (this.mounted)
-          this.state.position = $(ReactDOM.findDOMNode(this)).position();
+        if (this.mounted) {
+          if (this.state != null)
+            this.state.position = $(ReactDOM.findDOMNode(this)).position();
 
-        this.props.onDataTransfer(props.index, this.state);
+          this.props.onDataTransfer(this.state, this.type);
+          if (this.state.canDelete) this.props.onDelete(this.state.id, this.type);
+        }
     }, 100);
 
     this.elementFocusedTransistor = this.elementFocusedTransistor.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSizeChange = this.handleSizeChange.bind(this);
+    this.displayDeleteButton = this.displayDeleteButton.bind(this);
+    this.clearDeleteButton = this.clearDeleteButton.bind(this);
+    this.deleteComponent = this.deleteComponent.bind(this);
   }
 
   componentDidMount() {
 
-    if (this.props.id != null) this.setState({ id: this.props.id });
+    if (this.props.eId != null) this.setState({ eId: this.props.eId });
     if (this.props.path != null) this.setState({ path: this.props.path });
-    if (this.props.width != null) this.setState({ size: { width: this.props.width }});
-    if (this.props.height != null) this.setState({ size: { height: this.props.height }});
+    if (this.props.size != null) this.setState({ size: this.props.size });
 
     let position = this.state.position;
 
@@ -50,13 +59,16 @@ class Image extends React.Component {
   //getSnapshotBeforeUpdate() {} //Before a component update, you'd want to call this method
 
   componentDidUpdate() {
-    let position = this.state.position;
-
     if (this.mounted) {
-      if ($(ReactDOM.findDOMNode(this)).is("img")) {
-        $(ReactDOM.findDOMNode(this)).width(this.state.size.width+"%");
-        $(ReactDOM.findDOMNode(this)).height(this.state.size.height+"%");
+      let position = this.state.position;
+
+      if ($(ReactDOM.findDOMNode(this)).children().is("img")) {
+        $(ReactDOM.findDOMNode(this)).children().width(this.state.size.width+"pc");
+        $(ReactDOM.findDOMNode(this)).children().height(this.state.size.height+"pc");
       }
+
+      $(".btn-danger").width(11);
+      $(".btn-danger").height(24);
 
       $(ReactDOM.findDOMNode(this)).css({"position": "absolute", "top": position.top, "left": position.left});
       $(ReactDOM.findDOMNode(this)).draggable();
@@ -65,6 +77,17 @@ class Image extends React.Component {
 
   componentWillUnmount() {
     this.mounted = false;
+    this.isElementFocused = false;
+    this.currentImage = null;
+    this.props = null;
+    document.removeEventListener("mouseover", this.displayDeleteButton, false);
+    document.removeEventListener("mouseout", this.clearDeleteButton, false);
+    document.removeEventListener("click", this.handleChange, false);
+    document.removeEventListener("change", this.handleSizeChange, false);
+    document.removeEventListener("click", this.deleteComponent, false);
+    document.removeEventListener("click", this.elementFocusedTransistor, false);
+
+    console.log("Image component unmounted");
   }
 
   elementFocusedTransistor(event) {
@@ -74,8 +97,11 @@ class Image extends React.Component {
   }
 
   handleChange(event) {
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var newVal = $(event.target)[0].currentSrc;
+
+    if (newVal === "") return;
+
+    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     var newValEnc = newVal.split('');
     var breakPoint = parseInt(Math.random() * newVal.length);
 
@@ -99,7 +125,7 @@ class Image extends React.Component {
 
     //if ($(event.target).val() !== "") {
       this.setState({
-        id: newValEnc,
+        eId: newValEnc,
         path: newVal
       });
   }
@@ -113,10 +139,26 @@ class Image extends React.Component {
     });
   }
 
+  displayDeleteButton() {
+    $("#"+this.state.eId+" > .btn-danger").css("display", "inline");
+  }
+
+  clearDeleteButton() {
+    $("#"+this.state.eId+" > .btn-danger").css("display", "none");
+  }
+
+  deleteComponent() {
+    //ReactDOM.unmountComponentAtNode(document.getElementById("imgDiv"));
+    this.state.canDelete = true;
+  }
+
   render() {
     if (this.isElementFocused) {
       return(
-        <div>
+        <div id={this.state.eId} onMouseOver={this.displayDeleteButton} onMouseOut={this.clearDeleteButton}>
+          <button type="button" class="btn btn-danger" onClick={this.deleteComponent}>
+            <i class="fas fa-times"></i>
+          </button>
           <table onClick={this.handleChange} class="table table-bordered col-sm-1">
             <tbody>
               <tr>
@@ -135,16 +177,20 @@ class Image extends React.Component {
                     class="form-control-range" value={this.state.size.width}/>
           Height: <input id="height" type="range" onChange={this.handleSizeChange}
                     class="form-control-range" value={this.state.size.height}/>
-          <button type="button" class="btn btn-danger" onClick={this.elementFocusedTransistor}>
-            <i class="fas fa-times"></i>
+          <button type="button" class="btn btn-primary" onClick={this.elementFocusedTransistor}>
+            Switch
           </button>
         </div>
       );
     }
 
     else {
-      return(<img id={this.state.id} onClick={this.elementFocusedTransistor}
-                class="ws-component" src={this.state.path} />);
+      return(<div id={this.state.eId} onMouseOver={this.displayDeleteButton} onMouseOut={this.clearDeleteButton}>
+                <button type="button" class="btn btn-danger" onClick={this.deleteComponent}>
+                  <i class="fas fa-times"></i>
+                </button>
+                <img class="ws-component" onClick={this.elementFocusedTransistor} src={this.state.path} />
+            </div>);
     }
   }
 }

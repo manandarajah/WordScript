@@ -7,6 +7,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 nav {
+  position: fixed;
   top: 30vh;
   z-index: 1;
 }
@@ -28,6 +29,8 @@ td > img {
 .container-fluid {
   width: 100vw;
   height: 100vh;
+  position: absolute;
+  bottom: 0px;
 }
 
 .col-sm-1 {
@@ -37,12 +40,15 @@ td > img {
 .btn-danger {
   border-radius: 100%;
   float: right;
-  position: relative;
-  bottom: 393px;
-  left: 18px;
+  /*bottom: 393px;
+  right: -18px;*/
 }
 
-#hNumInput > span {
+.header > span {
   position: absolute;
   left: 12.3vw;
+}
+
+#imgDiv {
+  padding-right: 1px;
 }

@@ -7,47 +7,83 @@ class App extends React.Component {
     super(props);
 
     this.state = {
-      headers: [,],
-      images: [,]
+      headers: [],
+      images: []
     };
-
-    /*You need this parameter because react class component automatically has
-    strict-mode enabled, causing elements to render twice during the first run
-    as a side effect*/
-    this.firstRender = new Map();
-    this.firstRender.set("Header", true);
-    this.firstRender.set("Image", true);
 
     //A map of components list
     this.componentsData = new Map();
     this.componentsData.set("Header", this.state.headers);
     this.componentsData.set("Image", this.state.images);
 
+    //A map of anonymous functions used for editing existing components
+    this.componentsEdit = new Map();
+    this.componentsEdit.set("Header", (h) => {
+      return this.state.headers.map((header) => {
+        if (header.id === h.id) {
+          return {
+            ...header,
+            position: h.position,
+            eId: h.eId,
+            size: h.size,
+            val: h.val
+          };
+        }
+
+        return header;
+      });
+    });
+    this.componentsEdit.set("Image", (img) => {
+      return this.state.images.map((image) => {
+        if (image.id === img.id) {
+          return {
+            ...image,
+            position: img.position,
+            eId: img.eId,
+            size: img.size,
+            path: img.path
+          };
+        }
+
+        return image;
+      });
+    });
+
     //A map of anonymous functions updating components list onDataTransfer
     this.componentsAltered = new Map();
     this.componentsAltered.set("Header", (headers) => { this.setState({ headers: headers }); });
     this.componentsAltered.set("Image", (images) => { this.setState({ images: images }); });
 
+    this.firstRender = new Map();
+    this.firstRender.set("Header", true);
+    this.firstRender.set("Image", true);
+
     this.handleDataTransfer = this.handleDataTransfer.bind(this);
+    this.deleteData = this.deleteData.bind(this);
+  }
+
+  componentDidUpdate() {
+    this.componentsData.set("Header", this.state.headers);
+    this.componentsData.set("Image", this.state.images);
   }
 
   addComponent(newObj, type) {
     let compData = this.componentsData.get(type);
+    newObj.id = type + compData.length;
     compData.push(newObj);
     this.componentsAltered.get(type)(compData);
   }
 
-  handleDataTransfer(index, data) {
-    let compData = this.componentsData.get(data.type);
+  handleDataTransfer(data, type) {
+    let compData = this.componentsData.get(type);
+    compData = this.componentsEdit.get(type)(data);
+    this.componentsAltered.get(type)(compData);
+  }
 
-    if (this.firstRender.get(data.type)) {
-      compData.pop();
-
-      this.firstRender.set(data.type, false);
-    }
-    compData[index] = data;
-
-    this.componentsAltered.get(data.type)(compData);
+  deleteData(id, type) {
+    let compData = this.componentsData.get(type);
+    compData = compData.filter(data => data.id !== id );
+    this.componentsAltered.get(type)(compData);
   }
 
   render() {
@@ -63,13 +99,14 @@ class App extends React.Component {
             //var header = headers[index]
 
             return (
-              <Header key={index}
-                      index={index}
-                      position={header.position}
+              <Header key={header.id}
                       id={header.id}
+                      eId={header.eId}
+                      position={header.position}
                       size={header.size}
                       val={header.val}
-                      onDataTransfer={this.handleDataTransfer} />
+                      onDataTransfer={this.handleDataTransfer}
+                      onDelete={this.deleteData}/>
             );
           })}
         </section>
@@ -80,14 +117,14 @@ class App extends React.Component {
           //var header = headers[index]
 
           return (
-            <Image key={index}
-                    index={index}
-                    position={image.position}
-                    id={image.id}
-                    path={image.path}
-                    width={image.width}
-                    height={image.height}
-                    onDataTransfer={this.handleDataTransfer} />
+            <Image key={image.id}
+                   id={image.id}
+                   position={image.position}
+                   eId={image.eId}
+                   path={image.path}
+                   size={image.size}
+                   onDataTransfer={this.handleDataTransfer}
+                   onDelete={this.deleteData}/>
           );
         })}
         </section>

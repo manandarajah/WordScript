@@ -54,10 +54,6 @@ class App extends React.Component {
     this.componentsAltered.set("Header", (headers) => { this.setState({ headers: headers }); });
     this.componentsAltered.set("Image", (images) => { this.setState({ images: images }); });
 
-    this.firstRender = new Map();
-    this.firstRender.set("Header", true);
-    this.firstRender.set("Image", true);
-
     this.handleDataTransfer = this.handleDataTransfer.bind(this);
     this.deleteData = this.deleteData.bind(this);
   }

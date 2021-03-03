@@ -172,7 +172,7 @@ class Header extends React.Component {
       switch (this.state.size) {
         case 1:
           this.content = <h1 onClick={this.elementFocusedTransistor}
-                    class='ws-component'>{this.state.val}</h1>;
+                    class='ws-component header'>{this.state.val}</h1>;
           break;
         case 2:
           this.content = <h2 onClick={this.elementFocusedTransistor}

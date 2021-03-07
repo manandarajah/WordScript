@@ -4,7 +4,8 @@
   "description": "A dynamic website where users can have full control over designing an entire webpage to their liking by dragging and dropping components. You can control the content i.e headers, texts, images, etc. adjust component size, adjust component position, and many more.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

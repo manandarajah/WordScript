@@ -1,8 +1,7 @@
 $(document).ready(function() {
 
   //var focusedElement;
-  var scrollVal = 1;
-  var selectedComponent = "";
+  //var scrollVal = 1;
 
   console.log(React);
   console.log(ReactDOM);
@@ -11,16 +10,12 @@ $(document).ready(function() {
 
   console.log(user);
 
-  var app = ReactDOM.render(<App />, document.getElementsByClassName("container-fluid")[0]);
-
-  //Map of component offset data
-  var componentOffsets = new Map();
-  componentOffsets.set("Header", {xOffset: 200, yOffset: 20});
-  componentOffsets.set("Image", {xOffset: 400, yOffset: 140});
+  var react_app = ReactDOM.render(<App />, document.getElementsByClassName("container-fluid")[0]);
 
   setInterval(() => {
     //send components into a route, that route will pass the components data into a global server-side variable,
     //one that I can use to make comparisons to decide weather to insert or update a record
+    console.log(components);
     $.post(dir, {components: components}, function(data) {
       console.log("great success");
     });
@@ -28,38 +23,39 @@ $(document).ready(function() {
 
   //Handles selected element change
   $("li").click(function(e) {
-    selectedComponent = $(e.target).attr("id");
+    wordscript_selected_create_component_type = $(e.target).attr("id");
     $(".active").removeClass("active");
     $(e.target).parent().addClass("active");
+    console.log(wordscript_selected_create_component_type);
   });
 
   $("#copylink").click(function() {
-    var copylink = document.getElementsByName("link")[0];
-    copylink.style.display = "inline";
-    console.log(copylink.value);
-    copylink.select();
-    copylink.setSelectionRange(0, 99999);
+    var linkview = document.getElementsByName("linkview")[0];
+    linkview.style.display = "inline";
+    console.log(linkview.value);
+    linkview.select();
+    linkview.setSelectionRange(0, 99999);
     document.execCommand("copy");
-    copylink.style.display = "none";
+    linkview.style.display = "none";
     //selection.removeAllRanges();
-    //alert("Copied link to clipboard: " + copylink.value);
+    //alert("Copied link to clipboard: " + linkview.value);
   });
 
   //Manages content directly on webpage
   $(".container-fluid").dblclick(function(e) {
 
       //Adds a component to the webpage when the div tag double click event is invoked and if it's on an empty space
-      if (!$(e.target).hasClass("ws-component") && canEdit) {
+      if (!$(e.target).hasClass("ws-component") && is_edit_permission_granted) {
 
-          var newObj = {
+          var new_component_obj = {
             position: {
-              top: e.clientY - componentOffsets.get(selectedComponent).yOffset,
-              left: e.clientX - componentOffsets.get(selectedComponent).xOffset
+              top: e.clientY - component_off_set_values_map.get(wordscript_selected_create_component_type).yOffset,
+              left: e.clientX - component_off_set_values_map.get(wordscript_selected_create_component_type).xOffset
             }
           };
 
-        //This code calls anonymous function stored in key 'selectedComponent'
-        app.addComponent(newObj, selectedComponent);
+        //This code calls anonymous function stored in key 'wordscript_selected_create_component_type'
+        react_app.addComponent(new_component_obj, wordscript_selected_create_component_type);
       }
   });
 });

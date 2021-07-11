@@ -17,7 +17,7 @@ input[type='text'] {
   width: 25vw;
 }
 
-input[name='link'] {
+input[name='linkview'] {
   display: none;
 }
 
@@ -36,6 +36,13 @@ td > img {
   position: absolute;
   bottom: 0px;
 }
+
+/* #components {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  bottom: 0px;
+} */
 
 .col-sm-1 {
   width: 80px;

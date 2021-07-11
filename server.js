@@ -1,11 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const session = require('express-session');
+const mongoose_obj = require("./mongoose_obj");
 const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
-const findOrCreate = require('mongoose-findorcreate');
 const base64 = require('base-64');
 const queryString = require('query-string');
 
@@ -19,98 +16,8 @@ app.use(bodyParser.urlencoded({  extended: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect(process.env.DBHOST + process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true});
-//mongoose.set("useCreateIndex", true);
-
-const headerSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: [true, "Object Id is required"]
-  },
-  type: String,
-  position: {
-    top: Number,
-    left: Number
-  },
-  eId: {
-    type: String,
-    required: [true, "Component Id is required"]
-  },
-  size: {
-    type: Number,
-    min: 1,
-    max: 4
-  },
-  val: String
-});
-
-const imageSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    required: [true, "Object Id is required"]
-  },
-  type: String,
-  position: {
-    top: Number,
-    left: Number
-  },
-  eId: {
-    type: String,
-    required: [true, "Component Id is required"]
-  },
-  size: {
-    width: Number,
-    height: Number
-  },
-  path: String
-});
-
-const componentsSchema = new mongoose.Schema({
-  headers: [{headerSchema}],
-  images: [{imageSchema}]
-});
-
-const adminSchema = new mongoose.Schema({
-  name: String,
-  role: String,
-  componentsId: String,
-  components: componentsSchema
-});
-
-// function getHeader(object, callback) {
-//   Header.find({"id": object.id}, function(err, headers) {
-//     object.isNew = headers.length == 0 || headers[0].id != object.id ? true : false;
-//     callback(err);
-//   });
-// }
-
-// headerSchema.pre('save', function(next) {
-//   // var that = this;
-//   // getHeader(that, function(err) {
-//   //   if (err) {
-//   //     console.log(err);
-//   //
-//   //   }
-//   //   next();
-//   // });
-//   this.constructor.findOne(function(err, header) {
-//     if (err) {
-//       console.log(err);
-//     }
-//
-//     console.log("Inside " + this.isNew);
-//     this.isNew = false;
-//   });
-//   this.isNew = false;
-//
-//   console.log("Outside " + this.isNew);
-//   next();
-// });
-
-const Header = mongoose.model("Header", headerSchema);
-const Image = mongoose.model("Image", imageSchema);
-const Components = mongoose.model("Components", componentsSchema);
-const Admin = mongoose.model("Admin", adminSchema);
+mongoose_obj.initializeMongoose(process.env.DB_URL);
+mongoose_obj.initializeDBComponents();
 
 app.get('/', async function(req, res) {
   //res.sendFile(__dirname + '/index.html');
@@ -118,37 +25,36 @@ app.get('/', async function(req, res) {
   //Find admin record
   var admin;
   var headers = [], images = [];
-  var canEdit = true;
+  var is_edit_permission_granted = true;
   var url = req.url;
   var user;
 
-  if (req.url.includes('user')) {
-    canEdit = false;
+  //Checks to see if a client is using another client's linkview. If it's true, grant permission to view other client's
+  //content without editing privileges. If not, go to the main client's page with editing privileges
+  if (url.includes('user')) {
+    is_edit_permission_granted = false;
     url = url.replace('/','');
     var params = queryString.parse(url);
     var name = base64.decode(params.user);
-    admin = await Admin.findOne({"name": name }).exec();
+    admin = await mongoose_obj.findAdminWithName(name);
   }
 
-  else {
-    admin = await Admin.findOne().exec();
-  }
+  else
+    admin = await mongoose_obj.findOneAdmin();
 
   if (admin != null) {
-    //Referemce list of components in admin, both header and imageSchema
+    //Referemce list of components in admin, both header and images
     user = base64.encode(admin.name);
-    var components = await Components.findOne({"_id": admin.componentsId }).exec();
-    var headerIds = components.headers;
-    var imageIds = components.images;
+    var components = await mongoose_obj.findOneComponents(admin.components_id);
+    var header_id_array_list = components.headers;
+    var image_id_array_list = components.images;
 
     //Store them in an array, and pass them into the index.ejs, and store them to use with App.js
-    for (var i = 0; i < headerIds.length; ++i) {
-      headers.push(await Header.findOne({"_id": headerIds[i]._id}).exec());
-    }
+    for (var i = 0; i < header_id_array_list.length; ++i)
+      headers.push(await mongoose_obj.findOneHeaderWithComponentId(header_id_array_list[i]._id));
 
-    for (var i = 0; i < imageIds.length; ++i) {
-      images.push(await Image.findOne({"_id": imageIds[i]._id}).exec());
-    }
+    for (var i = 0; i < image_id_array_list.length; ++i)
+      images.push(await mongoose_obj.findOneImageWithComponentId(image_id_array_list[i]._id));
   }
 
   res.render("index",
@@ -157,143 +63,71 @@ app.get('/', async function(req, res) {
       dir: req.protocol + '://' + req.get('host') + url,
       headers: headers,
       images: images,
-      canEdit: canEdit
+      is_edit_permission_granted: is_edit_permission_granted
     });
 });
 
 app.post('/', async function(req, res) {
-  var componentsData = req.body.components;
+  var components_from_client_side = req.body.components;
   var headers = [], images = [];
+  console.log(components_from_client_side);
 
-  if (componentsData != null) {
-    if (componentsData.headers != null) {
-      await Promise.all(Object.keys(componentsData.headers).map(async h => {
-        var component = componentsData.headers[h];
-        var header = await Header.findOne({"id": component.id}).exec();
-        if(header){
-          //This code has a problem handling update of multiple records
-          /*for(key in component){
-            header[key] = component[key];
-          }*/
-          Header.updateOne({"id": header.id}, component, function(err, docs) {
-            if (err) {
-              console.log(err);
-            }
+  if (components_from_client_side != null) {
+    if (components_from_client_side.headers != null) {
+      headers = components_from_client_side.headers;
 
-            else {
-              //console.log("Updated header docs ", docs);
-            }
-          });
-        } else {
-          header = new Header({
-            id: component.id,
-            type: component.type,
-            position: component.position,
-            eId: component.eId,
-            size: component.size,
-            val: component.val
-          });
-
-          header.save();
-          //headers.push(header);
-        }
+      await Promise.all(Object.keys(headers).map(async h => {
+        var component = headers[h];
+        var header = await mongoose_obj.findOneHeaderWithId(component.id);
+        if(header)
+          mongoose_obj.updateOneHeader(component);
+        else
+          mongoose_obj.insertOneHeader(component);
       }));
     }
 
-    if (componentsData.images != null) {
-      await Promise.all(Object.keys(componentsData.images).map(async h => {
-        var component = componentsData.images[h];
-        var image = await Image.findOne({"id": component.id}).exec();
-        if(image){
-          Image.updateOne({"id": image.id}, component, function(err, docs) {
-            if (err) {
-              console.log(err);
-            }
+    if (components_from_client_side.images != null) {
+      images = components_from_client_side.images;
 
-            else {
-              //console.log("Updated header docs ", docs);
-            }
-          });
-        } else {
-          image = new Image({
-            id: component.id,
-            type: component.type,
-            position: component.position,
-            eId: component.eId,
-            size: component.size,
-            val: component.val
-          });
+      await Promise.all(Object.keys(images).map(async h => {
+        var component = images[h];
+        var image = await mongoose_obj.findOneImageWithId(component.id);
 
-          image.save();
-          //images.push(image);
-        }
+        if(image)
+          mongoose_obj.updateOneImage(component);
+        else
+          mongoose_obj.insertOneImage(component);
+
       }));
     }
   }
 
-  var components = await Components.find().exec();
-  //console.log(components);
-  headers = await Header.find().exec();
-  //console.log(headers);
-  images = await Image.find().exec();
+  var components = await mongoose_obj.findAllComponents();
+  headers = await mongoose_obj.findAllHeaders();
+  images = await mongoose_obj.findAllImages();
 
-  if (components.length > 0) {
-    Components.updateOne({"_id": components[0]._id}, {"headers": headers, "images": images}, function(err, docs) {
-      if (err) {
-        console.log(err);
-      }
-
-      else {
-        //console.log("Updated components docs ", docs);
-      }
-    });
-  }
-
+  if (components.length > 0)
+    mongoose_obj.updateOneComponents(components[0]._id, headers, images);
   else {
-    components = new Components({
-      headers: headers,
-      images: images
-    });
-    components.save();
-
-    const admin = new Admin({
-      name: "master",
-      role: "admin",
-      componentsId: components._id,
-      components: components
-    });
-    admin.save();
+    components = await mongoose_obj.insertOneComponents(headers, images);
+    mongoose_obj.insertOneAdmin(components);
   }
 
-  var admin = await Admin.find().exec();
+  var admin = await mongoose_obj.findAllAdmin();
 
-  if (admin.length > 0) {
-    Admin.updateOne({"_id": admin[0]._id}, {"components": components}, function(err, docs) {
-      if (err) {
-        console.log(err);
-      }
+  if (admin.length > 0)
+    mongoose_obj.updateOneAdmin(admin[0]._id, components);
 
-      else {
-        //console.log("Updated admin docs ", docs);
-      }
-    });
-  }
   res.end('yes');
 });
 
 app.post('/delete', async function(req, res) {
   var id = req.body.id;
-  // var type = id.replace(id[id.length - 1], '\0');
 
-  if (id.includes("Header")) {
-    await Header.deleteOne({"id": id}).exec();
-    console.log("Deleted header component");
-  }
-
-  else if (id.includes("Image")) {
-    await Image.deleteOne({"id": id}).exec();
-    console.log("Deleted image component");
-  }
+  if (id.includes("Header"))
+    mongoose_obj.deleteOneHeader(id);
+  else if (id.includes("Image"))
+    mongoose_obj.deleteOneImage(id);
 
   // switch (type) {
   //   case "Header":

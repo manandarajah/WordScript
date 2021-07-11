@@ -12,128 +12,142 @@ class App extends React.Component {
     };
 
     //A map of components list
-    this.componentsData = new Map();
-    this.componentsData.set("Header", this.state.headers);
-    this.componentsData.set("Image", this.state.images);
+    this.component_data_map = new Map();
+    this.component_data_map.set("Header", this.state.headers);
+    this.component_data_map.set("Image", this.state.images);
 
-    //A map of anonymous functions used for editing existing components
-    this.componentsEdit = new Map();
-    this.componentsEdit.set("Header", (h) => {
-      return this.state.headers.map((header) => {
-        if (header.id === h.id) {
-          return {
-            ...header,
-            position: h.position,
-            eId: h.eId,
-            size: h.size,
-            val: h.val
-          };
-        }
+    //A map of anonymous functions used for editing existing components O(n) THIS CAN BE IMPROVED
+    //How this works is that is gets a list from the map, iterate through each list 1 by 1 until it finds a match
+    //and makes the change
+    this.component_edit_anonymous_function_map = new Map();
 
-        return header;
-      });
-    });
-    this.componentsEdit.set("Image", (img) => {
-      return this.state.images.map((image) => {
-        if (image.id === img.id) {
-          return {
-            ...image,
-            position: img.position,
-            eId: img.eId,
-            size: img.size,
-            path: img.path
-          };
-        }
+     //this should edit one record in the map, optimizing the code from O(n) to O(1)
+    this.component_edit_anonymous_function_map.set("Header", (h) => {return this.state.headers.set(h.id, h)});
 
-        return image;
-      });
-    });
+    //this should edit one record in the map, optimizing the code from O(n) to O(1)
+    this.component_edit_anonymous_function_map.set("Image", (img) => {return this.state.images.set(img.id, img)});
 
     //A map of anonymous functions updating components list onDataTransfer
-    this.componentsAltered = new Map();
-    this.componentsAltered.set("Header", (headers) => { this.setState({ headers: headers }); });
-    this.componentsAltered.set("Image", (images) => { this.setState({ images: images }); });
+    this.component_data_modify_anonymous_function_map = new Map();
+    this.component_data_modify_anonymous_function_map.set("Header", (headers) => { this.setState({ headers: headers }); });
+    this.component_data_modify_anonymous_function_map.set("Image", (images) => { this.setState({ images: images }); });
 
     this.handleDataTransfer = this.handleDataTransfer.bind(this);
-    this.deleteData = this.deleteData.bind(this);
-  }
-
-  componentDidMount() {
-    /*if (headers.length > 0) this.setState({ headers: headers });
-    if (images.length > 0) this.setState({ images: images });*/
+    this.deleteComponent = this.deleteComponent.bind(this);
   }
 
   componentDidUpdate() {
-    this.componentsData.set("Header", this.state.headers);
-    this.componentsData.set("Image", this.state.images);
-    components = this.state;
+    this.component_data_map.set("Header", this.state.headers);
+    this.component_data_map.set("Image", this.state.images);
+    components = {headers: Array.from(this.state.headers.values()), images: Array.from(this.state.images.values())};
+
+    for (var i = 0; i < header_array_list.length; ++i)
+      init_header_focused[i] = false;
+
+    for (var i = 0; i < image_array_list.length; ++i)
+      init_image_focused[i] = false;
   }
 
   addComponent(newObj, type) {
-    let compData = this.componentsData.get(type);
-    newObj.id = type + compData.length;
-    compData.push(newObj);
-    this.componentsAltered.get(type)(compData);
+      let component_data = this.component_data_map.get(type);
+
+      //What happens in a scenario, we have Header5, but we delete Header3 so now there's 4 headers. How do we handle the naming
+      //convention here so it can be unique when we use it with maps
+      newObj.id = type + component_data.size;
+      component_data.set(newObj.id, newObj);
+      this.component_data_modify_anonymous_function_map.get(type)(component_data);
   }
 
   handleDataTransfer(data, type) {
-    let compData = this.componentsData.get(type);
-    compData = this.componentsEdit.get(type)(data);
-    this.componentsAltered.get(type)(compData);
+    let component_data = this.component_data_map.get(type);
+    component_data = this.component_edit_anonymous_function_map.get(type)(data);
+    this.component_data_modify_anonymous_function_map.get(type)(component_data);
   }
 
-  deleteData(id, type) {
-    let compData = this.componentsData.get(type);
-    compData = compData.filter(data => data.id !== id );
-    this.componentsAltered.get(type)(compData);
+  deleteComponent(id, type) {
+    let component_data = this.component_data_map.get(type);
+
+    //From here - Code optimization improved from O(n) to possibly O(log(n))
+    component_data.delete(id);
+    var id_int_value = parseInt(id.substring(id.length - 1));
+
+    if (id_int_value < component_data.size - 1) {
+      for (var i = id_int_value; i < component_data.size + 1; ++i) {
+          var old_id = type + "" + (i+1);
+          var data = component_data.get(old_id);
+          var new_id = type + "" + i;
+          data.id = new_id;
+          component_data.set(new_id, data);
+          component_data.delete(old_id);
+      }
+      //To here
+    }
+
+    this.component_data_modify_anonymous_function_map.get(type)(component_data);
     $.post(dir + "delete", {id: id}, function(data) {
       console.log("Component deleted: " + id);
     });
   }
 
+  // static getDerivedStateFromError(error) {
+  //   // Update state so the next render will show the fallback UI.
+  //   return this.setState({ hasError: true });
+  // }
+  //
+  // componentDidCatch(error, errorInfo) {
+  //   // You can also log the error to an error reporting service
+  //   logErrorToMyService(error, errorInfo);
+  // }
+
   render() {
-    let headers = this.state.headers;
-    let images = this.state.images;
+    let headers = Array.from(this.state.headers.values());
+    let images = Array.from(this.state.images.values());
+
+    // if (this.state.hasError) {
+    //   // You can render any custom fallback UI
+    //   throw new Error('Something went wrong');
+    // }
 
     return(
-      <div id="components">
+      <div id="components" /*onDoubleClick={this.addComponent}*/>
         <section id="headers">
           {
             Object.keys(headers).map((h, index) => {
-            var header = headers[h];
-            //var header = headers[index]
 
-            return (
-              <Header key={header.id}
-                      id={header.id}
-                      eId={header.eId}
-                      position={header.position}
-                      size={header.size}
-                      val={header.val}
-                      initElementFocused={initHeaderFocused[index]}
-                      canEdit={canEdit}
-                      onDataTransfer={this.handleDataTransfer}
-                      onDelete={this.deleteData}/>
-            );
-          })}
+              var header = headers[h];
+
+              return (
+                <Header key={header.id}
+                        id={header.id}
+                        element_id={header.element_id}
+                        position={header.position}
+                        size={header.size}
+                        val={header.val}
+                        init_element_focused={init_header_focused[index]}
+                        is_edit_permission_granted={is_edit_permission_granted}
+                        onDataTransfer={this.handleDataTransfer}
+                        onDelete={this.deleteComponent}/>
+              );
+            })
+
+          }
         </section>
         <section id="images">
         {
           Object.keys(images).map((i, index) => {
           var image = images[i];
-          //var header = headers[index]
 
           return (
             <Image key={image.id}
                    id={image.id}
                    position={image.position}
-                   eId={image.eId}
+                   element_id={image.element_id}
                    path={image.path}
                    size={image.size}
-                   initElementFocused={initImageFocused[index]}
-                   canEdit={canEdit}
+                   init_element_focused={init_image_focused[index]}
+                   is_edit_permission_granted={is_edit_permission_granted}
                    onDataTransfer={this.handleDataTransfer}
-                   onDelete={this.deleteData}/>
+                   onDelete={this.deleteComponent}/>
           );
         })}
         </section>

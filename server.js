@@ -70,7 +70,6 @@ app.get('/', async function(req, res) {
 app.post('/', async function(req, res) {
   var components_from_client_side = req.body.components;
   var headers = [], images = [];
-  console.log(components_from_client_side);
 
   if (components_from_client_side != null) {
     if (components_from_client_side.headers != null) {

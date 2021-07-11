@@ -15,7 +15,6 @@ $(document).ready(function() {
   setInterval(() => {
     //send components into a route, that route will pass the components data into a global server-side variable,
     //one that I can use to make comparisons to decide weather to insert or update a record
-    console.log(components);
     $.post(dir, {components: components}, function(data) {
       console.log("great success");
     });

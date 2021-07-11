@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({  extended: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose_obj.initializeMongoose(process.env.DB_URL);
+mongoose_obj.initializeMongoose(process.env.DBHOST + process.env.DB);
 mongoose_obj.initializeDBComponents();
 
 app.get('/', async function(req, res) {

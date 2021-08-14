@@ -142,3 +142,7 @@ app.post('/delete', async function(req, res) {
 app.listen(process.env.PORT || 3000, function() {
   console.log("Server is runnning on port 3000");
 });
+
+app.post('/uploadimage', async function(req, res) {
+  console.log("Calling upload image");
+});

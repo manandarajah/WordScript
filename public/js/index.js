@@ -10,11 +10,39 @@ $(document).ready(function() {
 
   console.log(user);
 
+  var clientX, clientY;
+
+  let dropzone = new Dropzone("div.container-fluid", {url: dir + "uploadimage"});
+  dropzone.autoDiscover = false;
+
+  //if (dropzone != null) {
+  dropzone.on("addedfile", file => {
+    // var new_component_obj = {
+    //   position: {
+    //     top: clientY - component_off_set_values_map.get(wordscript_selected_create_component_type).yOffset,
+    //     left: clientX - component_off_set_values_map.get(wordscript_selected_create_component_type).xOffset
+    //   },
+    //   path: file.dataURL,
+    //   size: {
+    //     width: file.width,
+    //     height: file.height
+    //   }
+    // };
+    //
+    // react_app.addComponent(new_component_obj, wordscript_selected_create_component_type);
+  });
+
+  dropzone.on("complete", file => {
+    console.log(file);
+  })
+  //}
+
   var react_app = ReactDOM.render(<App />, document.getElementsByClassName("container-fluid")[0]);
 
   setInterval(() => {
     //send components into a route, that route will pass the components data into a global server-side variable,
     //one that I can use to make comparisons to decide weather to insert or update a record
+
     $.post(dir, {components: components}, function(data) {
       console.log("great success");
     });
@@ -48,13 +76,26 @@ $(document).ready(function() {
 
           var new_component_obj = {
             position: {
-              top: e.clientY - component_off_set_values_map.get(wordscript_selected_create_component_type).yOffset,
-              left: e.clientX - component_off_set_values_map.get(wordscript_selected_create_component_type).xOffset
+              top: clientY - component_off_set_values_map.get(wordscript_selected_create_component_type).yOffset,
+              left: clientX - component_off_set_values_map.get(wordscript_selected_create_component_type).xOffset
             }
           };
 
         //This code calls anonymous function stored in key 'wordscript_selected_create_component_type'
         react_app.addComponent(new_component_obj, wordscript_selected_create_component_type);
       }
+  });
+
+  //Tracks current mouse position
+  $(".container-fluid").mousemove(function(e) {
+
+    //Activates dropzone features based on current component selected
+    if (wordscript_selected_create_component_type == "Image")
+      dropzone.enable();
+    else
+      dropzone.disable();
+
+    clientX = e.clientX;
+    clientY = e.clientY;
   });
 });

@@ -76,12 +76,7 @@ app.post('/', async function(req, res) {
       headers = components_from_client_side.headers;
 
       await Promise.all(Object.keys(headers).map(async h => {
-        var component = headers[h];
-        var header = await mongoose_obj.findOneHeaderWithId(component.id);
-        if(header)
-          mongoose_obj.updateOneHeader(component);
-        else
-          mongoose_obj.insertOneHeader(component);
+        mongoose_obj.updateOneHeader(headers[h]);
       }));
     }
 
@@ -89,14 +84,7 @@ app.post('/', async function(req, res) {
       images = components_from_client_side.images;
 
       await Promise.all(Object.keys(images).map(async h => {
-        var component = images[h];
-        var image = await mongoose_obj.findOneImageWithId(component.id);
-
-        if(image)
-          mongoose_obj.updateOneImage(component);
-        else
-          mongoose_obj.insertOneImage(component);
-
+        mongoose_obj.updateOneImage(images[h]);
       }));
     }
   }

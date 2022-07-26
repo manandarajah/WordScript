@@ -131,7 +131,7 @@ module.exports = {
     return Header.find().exec();
   },
   updateOneHeader: async function(header) {
-    Header.updateOne({"id": header.id}, header, { upsert: true}, function(err, data) {
+    Header.updateOne({"id": header.id}, header, { upsert: true}, function(err, data) { // {upsert: true} configures the update in that if no record exists, it'll insert to create a new record
       if (err) console.log(err);
       else {
 

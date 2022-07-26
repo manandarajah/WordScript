@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const mongoose_obj = require("./mongoose_obj");
 const passport = require('passport');
@@ -10,6 +11,12 @@ const app = express();
 
 app.enable('trust proxy');
 app.set("view engine", "ejs");
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}));
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({  extended: true }));
 
@@ -76,12 +83,7 @@ app.post('/', async function(req, res) {
       headers = components_from_client_side.headers;
 
       await Promise.all(Object.keys(headers).map(async h => {
-        var component = headers[h];
-        var header = await mongoose_obj.findOneHeaderWithId(component.id);
-        if(header)
-          mongoose_obj.updateOneHeader(component);
-        else
-          mongoose_obj.insertOneHeader(component);
+        mongoose_obj.updateOneHeader(headers[h]);
       }));
     }
 
@@ -89,14 +91,7 @@ app.post('/', async function(req, res) {
       images = components_from_client_side.images;
 
       await Promise.all(Object.keys(images).map(async h => {
-        var component = images[h];
-        var image = await mongoose_obj.findOneImageWithId(component.id);
-
-        if(image)
-          mongoose_obj.updateOneImage(component);
-        else
-          mongoose_obj.insertOneImage(component);
-
+        mongoose_obj.updateOneImage(images[h]);
       }));
     }
   }

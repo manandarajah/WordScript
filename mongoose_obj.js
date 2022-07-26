@@ -131,25 +131,25 @@ module.exports = {
     return Header.find().exec();
   },
   updateOneHeader: async function(header) {
-    Header.updateOne({"id": header.id}, header, function(err, data) {
+    Header.updateOne({"id": header.id}, header, { upsert: true}, function(err, data) {
       if (err) console.log(err);
       else {
 
       }
     });
   },
-  insertOneHeader: function(new_header) {
-    var header = new Header({
-      id: new_header.id,
-      type: new_header.type,
-      position: new_header.position,
-      element_id: new_header.element_id,
-      size: new_header.size,
-      val: new_header.val
-    });
+  // insertOneHeader: function(new_header) {
+  //   var header = new Header({
+  //     id: new_header.id,
+  //     type: new_header.type,
+  //     position: new_header.position,
+  //     element_id: new_header.element_id,
+  //     size: new_header.size,
+  //     val: new_header.val
+  //   });
 
-    header.save();
-  },
+  //   header.save();
+  // },
   deleteOneHeader: async function(id) {
     await Header.deleteOne({"id": id}).exec();
     console.log("Deleted header component");
@@ -164,25 +164,25 @@ module.exports = {
     return Image.find().exec();
   },
   updateOneImage: async function(image) {
-    Image.updateOne({"id": image.id}, image, function(err, data) {
+    Image.updateOne({"id": image.id}, image, { upsert: true}, function(err, data) {
       if (err) console.log(err);
       else {
 
       }
     });
   },
-  insertOneImage: function(new_image) {
-    var image = new Image({
-      id: new_image.id,
-      type: new_image.type,
-      position: new_image.position,
-      element_id: new_image.element_id,
-      size: new_image.size,
-      val: new_image.val
-    });
+  // insertOneImage: function(new_image) {
+  //   var image = new Image({
+  //     id: new_image.id,
+  //     type: new_image.type,
+  //     position: new_image.position,
+  //     element_id: new_image.element_id,
+  //     size: new_image.size,
+  //     val: new_image.val
+  //   });
 
-    image.save();
-  },
+  //   image.save();
+  // },
   deleteOneImage: async function(id) {
     await Image.deleteOne({"id": id}).exec();
     console.log("Deleted image component");

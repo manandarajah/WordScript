@@ -1,5 +1,6 @@
 require('dotenv').config({path: 'env'});
 const express = require('express');
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const mongoose_obj = require("./mongoose_obj");
 const passport = require('passport');
@@ -10,6 +11,12 @@ const app = express();
 
 app.enable('trust proxy');
 app.set("view engine", "ejs");
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}));
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({  extended: true }));
 

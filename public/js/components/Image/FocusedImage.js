@@ -72,14 +72,14 @@ class FocusedImage extends React.Component {
         <table onClick={this.handleChange} class="table table-bordered col-sm-1">
           <tbody>
             <tr>
-              <td><img src="https://word-script.herokuapp.com/images/cycle.jpg"/></td>
-              <td><img src="https://word-script.herokuapp.com/images/desert.jpg"/></td>
-              <td><img src="https://word-script.herokuapp.com/images/land.jpg"/></td>
+              <td><img src="https://word-script.cyclic.app/images/cycle.jpg"/></td>
+              <td><img src="https://word-script.cyclic.app/images/desert.jpg"/></td>
+              <td><img src="https://word-script.cyclic.app/images/land.jpg"/></td>
             </tr>
             <tr>
-              <td><img src="https://word-script.herokuapp.com/images/landandwater.jpg"/></td>
-              <td><img src="https://word-script.herokuapp.com/images/milkyway.jpg"/></td>
-              <td><img src="https://word-script.herokuapp.com/images/surf.jpg"/></td>
+              <td><img src="https://word-script.cyclic.app/images/landandwater.jpg"/></td>
+              <td><img src="https://word-script.cyclic.app/images/milkyway.jpg"/></td>
+              <td><img src="https://word-script.cyclic.app/images/surf.jpg"/></td>
             </tr>
           </tbody>
         </table>
